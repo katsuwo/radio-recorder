@@ -290,21 +290,12 @@ def run_recording_schedule(
         output_path.parent.mkdir(parents=True, exist_ok=True)
         ffmpeg_bin = resolve_ffmpeg_bin()
 
-        command = [
-            ffmpeg_bin,
-            "-hide_banner",
-            "-loglevel",
-            "error",
-            "-y",
-            "-i",
-            stream_url,
-            "-vn",
-            "-acodec",
-            "copy",
-            "-t",
-            str(duration_seconds),
-            str(output_path),
-        ]
+        command = build_ffmpeg_command(
+            ffmpeg_bin=ffmpeg_bin,
+            stream_url=stream_url,
+            duration_seconds=duration_seconds,
+            output_path=output_path,
+        )
         print(f"Recording to {output_path} for {duration_seconds} seconds")
         subprocess.run(command, check=True)
         print(f"Finished recording: {output_path}")
@@ -415,12 +406,34 @@ def _record_target(
     output_path.parent.mkdir(parents=True, exist_ok=True)
     ffmpeg_bin = resolve_ffmpeg_bin()
 
-    command = [
+    command = build_ffmpeg_command(
+        ffmpeg_bin=ffmpeg_bin,
+        stream_url=stream_url,
+        duration_seconds=duration_seconds,
+        output_path=output_path,
+    )
+    print(f"Recording to {output_path} for {duration_seconds} seconds")
+    subprocess.run(command, check=True)
+    print(f"Finished recording: {output_path}")
+
+
+def build_ffmpeg_command(
+    *,
+    ffmpeg_bin: str,
+    stream_url: str,
+    duration_seconds: int,
+    output_path: Path,
+) -> list[str]:
+    return [
         ffmpeg_bin,
         "-hide_banner",
         "-loglevel",
         "error",
         "-y",
+        # HLS live streams default to starting a few segments behind the live edge.
+        # For scheduled recordings we want the newest segment available at start time.
+        "-live_start_index",
+        "-1",
         "-i",
         stream_url,
         "-vn",
@@ -430,9 +443,6 @@ def _record_target(
         str(duration_seconds),
         str(output_path),
     ]
-    print(f"Recording to {output_path} for {duration_seconds} seconds")
-    subprocess.run(command, check=True)
-    print(f"Finished recording: {output_path}")
 
 
 def resolve_target_date(raw_value: str | None) -> date:

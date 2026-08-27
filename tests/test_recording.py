@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 from nhk_radio_recorder.nhk_api import Program
 from nhk_radio_recorder.recording import (
+    build_ffmpeg_command,
     fetch_programs_for_day,
     fetch_stream_urls_for_area,
     classify_program,
@@ -171,6 +172,35 @@ class RecordingTests(unittest.TestCase):
         self.assertEqual(rules.include[0].match, ("特集",))
         self.assertEqual(rules.exclude, (("除外番組",),))
 
+    def test_build_ffmpeg_command_starts_from_live_edge(self) -> None:
+        command = build_ffmpeg_command(
+            ffmpeg_bin="/usr/bin/ffmpeg",
+            stream_url="https://example.invalid/r1.m3u8",
+            duration_seconds=600,
+            output_path=Path("recordings/test.m4a"),
+        )
+
+        self.assertEqual(
+            command,
+            [
+                "/usr/bin/ffmpeg",
+                "-hide_banner",
+                "-loglevel",
+                "error",
+                "-y",
+                "-live_start_index",
+                "-1",
+                "-i",
+                "https://example.invalid/r1.m3u8",
+                "-vn",
+                "-acodec",
+                "copy",
+                "-t",
+                "600",
+                "recordings/test.m4a",
+            ],
+        )
+
     def test_custom_rules_can_override_default_selection(self) -> None:
         with TemporaryDirectory() as temp_dir:
             rules_path = Path(temp_dir) / "rules.json"
@@ -215,7 +245,7 @@ class RecordingTests(unittest.TestCase):
             service="r1",
             start_time="2026-08-21T11:50:00+09:00",
             end_time="2026-08-21T12:00:00+09:00",
-            title="気象情報（関東）",
+            title="まいにち朗読",
         )
         target = classify_program(program, self.rules)
         self.assertIsNotNone(target)
@@ -276,7 +306,7 @@ class RecordingTests(unittest.TestCase):
             service="r1",
             start_time="2026-08-21T11:50:00+09:00",
             end_time="2026-08-21T12:00:00+09:00",
-            title="気象情報（関東）",
+            title="まいにち朗読",
         )
         late_target = classify_program(late_program, self.rules)
         early_target = classify_program(early_program, self.rules)
@@ -330,7 +360,7 @@ class RecordingTests(unittest.TestCase):
         mock_subprocess_run.assert_called_once()
         command = mock_subprocess_run.call_args.args[0]
         self.assertEqual(command[0], "/usr/bin/ffmpeg")
-        self.assertTrue(command[-1].endswith("20260821_1150_気象情報（関東）.m4a"))
+        self.assertTrue(command[-1].endswith("20260821_1150_まいにち朗読.m4a"))
 
     @patch("nhk_radio_recorder.recording.fetch_schedule")
     @patch("nhk_radio_recorder.recording.extract_programs")
