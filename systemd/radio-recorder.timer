@@ -1,0 +1,10 @@
+[Unit]
+Description=Run NHK radio recorder every day
+
+[Timer]
+OnCalendar=*-*-* 00:05:00
+Persistent=true
+Unit=radio-recorder.service
+
+[Install]
+WantedBy=timers.target

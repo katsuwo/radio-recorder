@@ -1,0 +1,15 @@
+[Unit]
+Description=Record daily NHK radio shows
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/katsuwo/work/radio-recorder
+EnvironmentFile=%h/.config/radio-recorder/radio-recorder.env
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/home/katsuwo/work/radio-recorder/scripts/run_daily_recording.sh
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,10 @@
+.pytest_cache/
+__pycache__/
+*.pyc
+.env
+.venv/
+recordings/
+transcripts/
+state.vscdb
+rawdata.txt
+test.m4a

@@ -1,0 +1,37 @@
+{
+  "exclude": [
+    {
+      "match": [
+        "みんなのうた"
+      ]
+    }
+  ],
+  "include": [
+    {
+      "category": "ラジオ深夜便",
+      "folder_name": "radio_shinyabin",
+      "match": [
+        "ラジオ深夜便"
+      ]
+    },
+    {
+      "category": "朗読",
+      "folder_name": "reading",
+      "match": [
+        "朗読"
+      ]
+    },
+    {
+      "category": "ラジオドラマ",
+      "folder_name": "radio_drama",
+      "match": [
+        "ドラマ",
+        "FMシアター",
+        "青春アドベンチャー",
+        "新日曜名作座",
+        "オーディオドラマ",
+        "ラジオドラマ"
+      ]
+    }
+  ]
+}
